@@ -5,6 +5,7 @@ import errno
 import logging
 import os
 import os.path
+import platform
 import re
 import subprocess
 import stat
@@ -583,6 +584,20 @@ def activate(
                 )
 
         if init is not None:
+            if init == 'auto':
+                c = get_conf(
+                    cluster=cluster,
+                    variable='init'
+                    )
+                if c is not None:
+                    init = c
+                else:
+                    (distro, release, codename) = platform.dist()
+                    if distro == 'Ubuntu':
+                        init = 'upstart'
+                    else:
+                        init = 'sysvinit'
+
             log.debug('Marking with init system %s', init)
             with file(os.path.join(path, init), 'w'):
                 pass
@@ -652,8 +667,6 @@ def parse_args():
 
 
 def main():
-    import platform
-
     args = parse_args()
 
     loglevel = logging.INFO
@@ -663,18 +676,6 @@ def main():
     logging.basicConfig(
         level=loglevel,
         )
-
-    if args.init == 'auto':
-        c = get_conf(args.cluster, 'init')
-        if c is not None:
-            args.init = c
-        else:
-            (distro, release, codename) = platform.dist()
-            if distro == 'Ubuntu':
-                args.init = 'upstart'
-            else:
-                args.init = 'sysvinit'
-        log.debug('Using init system %s', args.init)
 
     try:
         cluster = None
