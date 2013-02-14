@@ -15,6 +15,7 @@ init_systems = [
     'upstart',
     'sysvinit',
     'systemd',
+    'auto',
     ]
 
 log_name = __name__
@@ -638,6 +639,7 @@ def parse_args():
         '--mark-init',
         metavar='INITSYSTEM',
         help='init system to manage this dir',
+        default='auto',
         choices=init_systems,
         )
     parser.set_defaults(
@@ -659,6 +661,22 @@ def main():
     logging.basicConfig(
         level=loglevel,
         )
+
+    if args.init = 'auto':
+        c = get_conf(args.cluster, 'init')
+        if c is not None:
+            args.init = c
+        else:
+            distro = None
+            try:
+                distro = _check_output(args=['lsb_release', '--id', 's'])
+            except:
+                pass
+            if distro = 'Ubuntu':
+                args.init = 'upstart'
+            else:
+                args.init = 'sysvinit'
+        log.debug('Using init system %s', args.init)
 
     try:
         cluster = None
