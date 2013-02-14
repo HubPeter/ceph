@@ -652,6 +652,8 @@ def parse_args():
 
 
 def main():
+    import platform
+
     args = parse_args()
 
     loglevel = logging.INFO
@@ -662,17 +664,13 @@ def main():
         level=loglevel,
         )
 
-    if args.init = 'auto':
+    if args.init == 'auto':
         c = get_conf(args.cluster, 'init')
         if c is not None:
             args.init = c
         else:
-            distro = None
-            try:
-                distro = _check_output(args=['lsb_release', '--id', 's'])
-            except:
-                pass
-            if distro = 'Ubuntu':
+            (distro, release, codename) = platform.dist()
+            if distro == 'Ubuntu':
                 args.init = 'upstart'
             else:
                 args.init = 'sysvinit'
